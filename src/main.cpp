@@ -19,6 +19,8 @@
 #include "mbed.h"
 #include <test.h>
 
+//v0.0 
+
 // ------ init de base pour le tout
 BufferedSerial pc(USBTX, USBRX, 921600); // communication avec le pc
 ThreadCAN threadCAN;                     // gestion de la communication can
