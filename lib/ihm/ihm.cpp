@@ -18,64 +18,81 @@ Ihm::Ihm(ThreadLvgl *t) {
     lv_obj_t *label = lv_label_create(tab_btns);
     lv_label_set_text(label, "CRAC2026");
     lv_obj_align(label, LV_ALIGN_TOP_LEFT, 337, 0);
-    tabSdInit = lv_tabview_add_tab(tabView, "SD");
-    sdInit(tabSdInit);
+
+    // Ajout de l'onglet CarteSd2
+    tabCarteSd2 = lv_tabview_add_tab(tabView, "CarteSd2");
+    carteSd2Init(tabCarteSd2);
 
     t->unlock();
 }
 
-void Ihm::sdInit(lv_obj_t *parent) {
- 
+void Ihm::carteSd2Init(lv_obj_t *parent) {
+    // Titre
     lv_obj_t *titre = lv_label_create(parent);
-    lv_label_set_text(titre, "Initialisation carte SD");
-    lv_obj_align(titre, LV_ALIGN_TOP_MID, 0, 20); 
+    lv_label_set_text(titre, LV_SYMBOL_SD_CARD " Détection Carte SD");
+    lv_obj_set_style_text_font(titre, FONT_LARGE, 0);
+    lv_obj_align(titre, LV_ALIGN_TOP_MID, 0, 20);
 
-    lv_obj_t *spinner = lv_spinner_create(parent, 1000, 60); 
-    lv_obj_set_size(spinner, 100, 100); // taille du spinner 
-    lv_obj_align(spinner, LV_ALIGN_CENTER, 0, -40); // Aligné exactement au centre
+    // Spinner (indicateur de chargement animé)
+    spinnerCarteSd2 = lv_spinner_create(parent, 1000, 60);
+    lv_obj_set_size(spinnerCarteSd2, 120, 120);
+    lv_obj_align(spinnerCarteSd2, LV_ALIGN_CENTER, 0, -20);
 
+    // Label de statut principal
+    labelCarteSd2Status = lv_label_create(parent);
+    lv_label_set_text(labelCarteSd2Status, LV_SYMBOL_REFRESH " En attente de la carte SD...");
+    lv_obj_set_style_text_font(labelCarteSd2Status, FONT_NORMAL, 0);
+    lv_obj_align(labelCarteSd2Status, LV_ALIGN_CENTER, 0, 80);
 
-    msgSdInit1 = lv_label_create(parent);
-    lv_label_set_text(msgSdInit1, "");
-    lv_obj_align(msgSdInit1, LV_ALIGN_TOP_MID, 0, 45); // En dessous du spinner
-
-  
-    msgSdInit2 = lv_label_create(parent);
-    lv_label_set_text(msgSdInit2, "");
-    lv_obj_align(msgSdInit2, LV_ALIGN_CENTER, 0, 160); // En bas à droite
-
-
-
-    // exemple image
-
-    // lv_obj_t *img1 = lv_img_create(parent);
-    // lv_img_set_src(img1, "A:/images/minion.bin");
-    // lv_obj_align(img1, LV_ALIGN_TOP_LEFT, 0, 0);
-    // lv_obj_set_size(img1, 255, 255);
+    // Label pour le nombre de fichiers
+    labelCarteSd2FileCount = lv_label_create(parent);
+    lv_label_set_text(labelCarteSd2FileCount, "");
+    lv_obj_set_style_text_font(labelCarteSd2FileCount, FONT_NORMAL, 0);
+    lv_obj_align(labelCarteSd2FileCount, LV_ALIGN_CENTER, 0, 130);
 }
 
-void Ihm::sdMsg(const char *msg1, const char *msg2) {
+void Ihm::updateCarteSd2Status(bool detected, int fileCount) {
     m_threadLvgl->lock();
-    if (msg1 != nullptr)
-        lv_label_set_text(msgSdInit1, msg1);
-    if (msg2 != nullptr)
-        lv_label_set_text(msgSdInit2, msg2);
+
+    if (detected) {
+        // Masquer le spinner quand la carte SD est détectée
+        lv_obj_add_flag(spinnerCarteSd2, LV_OBJ_FLAG_HIDDEN);
+
+        // Mettre à jour le message de statut
+        lv_label_set_text(labelCarteSd2Status, LV_SYMBOL_OK " Carte SD détectée");
+        lv_obj_set_style_text_color(labelCarteSd2Status, lv_palette_main(LV_PALETTE_GREEN), 0);
+
+        // Afficher le nombre de fichiers
+        char buf[100];
+        sprintf(buf, LV_SYMBOL_FILE " %d fichier%s trouvé%s",
+                fileCount,
+                (fileCount > 1) ? "s" : "",
+                (fileCount > 1) ? "s" : "");
+        lv_label_set_text(labelCarteSd2FileCount, buf);
+        lv_obj_set_style_text_color(labelCarteSd2FileCount, lv_palette_main(LV_PALETTE_BLUE), 0);
+    } else {
+        // Afficher le spinner quand la carte SD n'est pas détectée
+        lv_obj_clear_flag(spinnerCarteSd2, LV_OBJ_FLAG_HIDDEN);
+
+        // Mettre à jour le message de statut
+        lv_label_set_text(labelCarteSd2Status, LV_SYMBOL_WARNING " Carte SD non détectée - En attente...");
+        lv_obj_set_style_text_color(labelCarteSd2Status, lv_palette_main(LV_PALETTE_ORANGE), 0);
+
+        // Effacer le compteur de fichiers
+        lv_label_set_text(labelCarteSd2FileCount, "");
+    }
+
     m_threadLvgl->unlock();
 }
 
 void Ihm::show(const vector<string> fichiers) {
     m_threadLvgl->lock();
 
-  //  Ajout d'un bouton sur l'onglet SD Init
-    refreshSD = lv_btn_create(tabSdInit);
-    lv_obj_t *label = lv_label_create(refreshSD);
-    lv_label_set_text(label, "Rafraichir SD");
-    lv_obj_center(label);
-    lv_obj_align(refreshSD, LV_ALIGN_BOTTOM_MID, 0, -40);
-    lv_obj_add_event_cb(refreshSD, Ihm::eventHandler, LV_EVENT_CLICKED, this);
-
    // Ajoute un onglet nommé "Show" à l'objet tabView
 tabMatch = lv_tabview_add_tab(tabView, "Show");
+
+// Déclaration de la variable label utilisée pour les boutons
+lv_obj_t *label;
 
 // Configuration de la grille
 static lv_coord_t col_dsc[] = {LV_GRID_FR(5), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};

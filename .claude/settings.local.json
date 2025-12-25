@@ -1,0 +1,13 @@
+{
+  "permissions": {
+    "allow": [
+      "SlashCommand(/init)",
+      "Bash(dir /b \"C:\\Travail\\yanis_allouche\\STRAT\\Ecran_Strategie_V4\\lib\")",
+      "Bash(ls:*)",
+      "Bash(cat:*)",
+      "Bash(pio run:*)",
+      "Bash(platformio run:*)",
+      "Bash(python3:*)"
+    ]
+  }
+}

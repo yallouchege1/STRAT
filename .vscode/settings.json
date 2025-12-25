@@ -57,5 +57,6 @@
         "cinttypes": "cpp",
         "typeinfo": "cpp",
         "mstd_mutex": "cpp"
-    }
+    },
+    "cmake.sourceDirectory": "C:/Travail/yanis_allouche/STRAT/Ecran_Strategie_V4/lib/lvgl-8.3.4"
 }

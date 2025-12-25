@@ -60,11 +60,7 @@ protected:
     EventFlags flags;
     ThreadLvgl *m_threadLvgl;
     lv_style_t styleTitre;
-    // Initialisation de la carte SD
     lv_obj_t *tabView;
-    lv_obj_t *msgSdInit1, *msgSdInit2;
-    lv_obj_t *tabSdInit;
-    lv_obj_t *refreshSD;
     // Onglet "match"
     lv_obj_t *tabMatch;
     lv_obj_t *roller;
@@ -97,9 +93,15 @@ protected:
         lv_obj_t *niveauxbase_avant ;
         lv_obj_t *niveauxbase_arriere ; 
 
-    lv_obj_t * lacher ; 
-    lv_obj_t * autre ; 
-    
+    lv_obj_t * lacher ;
+    lv_obj_t * autre ;
+
+    // Onglet "CarteSd2"
+    lv_obj_t *tabCarteSd2;
+    lv_obj_t *spinnerCarteSd2;
+    lv_obj_t *labelCarteSd2Status;
+    lv_obj_t *labelCarteSd2FileCount;
+
     int volume;
     int mp3;
 
@@ -112,15 +114,14 @@ protected:
     lv_obj_t *msgBox;
     lv_obj_t *msgBoxChoixNIV ; 
 
-    void sdInit(lv_obj_t *parent);
+    void carteSd2Init(lv_obj_t *parent);
     static void eventHandler(lv_event_t *e);
     bool getFlag(IhmFlag f, bool clearIfSet = true);
     
 
 public:
-    
+
     Ihm(ThreadLvgl *t);
-    void sdMsg(const char *msg1, const char *msg2 = "");
     void show(const vector<string> fichiers);
     void matchRollerSetOptions(const vector<string> fichiers, bool lock = true);
     void recalagePositionInit();
@@ -187,13 +188,16 @@ bool autretest(bool clearIfSet = true) { return getFlag(IHM_FLAG__autre, clearIf
     void configStopPlaying();
     void showButtonSelectionBox() ; 
     void showButtonSelectionBoxClose() ; 
-    void showButtonascenceurBox() ; 
-    void showButtonascenceurBoxClose() ; 
-    void msgBoxmatchshow (const string &strategie) ; 
-    void msgBoxmatchshowclose ()  ; 
+    void showButtonascenceurBox() ;
+    void showButtonascenceurBoxClose() ;
+    void msgBoxmatchshow (const string &strategie) ;
+    void msgBoxmatchshowclose ()  ;
 
-  
-  
+    // CarteSd2 methods
+    void updateCarteSd2Status(bool detected, int fileCount);
+
+
 };
+
 
 #endif

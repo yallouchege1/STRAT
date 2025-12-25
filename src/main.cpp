@@ -47,7 +47,11 @@ void runMatch();
 int tempsRestant();
 void forceFinMatch();
 volatile bool flagForceFinMatch = false;
-
+// ------ Ticker pour mise à jour CarteSd2
+Ticker carteSd2UpdateTicker;
+void updateCarteSd2();
+int countStrategyFiles();
+volatile bool flagUpdateCarteSd2 = false;
 DigitalOut led1(PG_6);
 DigitalOut led2(PD_4);
 DigitalOut led3(PD_5);
@@ -60,6 +64,7 @@ int selasc = 1;
 void run_show(void);
 
 int main()
+
 {
 
     printf("\n Show debut de l'écran de stratégie ->  \n");
@@ -98,49 +103,77 @@ int main()
     //  donne le nombre et le chemin des fichier stratégie :
     if (!listeFichiers())
     {
-        string msg = "Dossier " + config["Dossiers"]["strategie"] + " non trouvé";
-        ihm.sdMsg(nullptr, msg.c_str());
+        printf("Dossier %s non trouvé\n", config["Dossiers"]["strategie"].c_str());
     }
     else if (fichiers.size() == 0)
     {
-        ihm.sdMsg(nullptr, "Aucun fichier trouvé"); 
+        printf("Aucun fichier trouvé\n");
     }
     else
     {
         int nb = fichiers.size();
         if (nb == 1)
         {
-            sprintf(buf, "Un fichier trouvé");
+            printf("Un fichier trouvé\n");
         }
         else
         {
-            sprintf(buf, "%d fichiers trouvés", nb); 
+            printf("%d fichiers trouvés\n", nb);
         }
-        ihm.sdMsg(nullptr, buf);
     }
     // --------------------
 
     // fin de gestion des fichier et de la carte sd
     // a la fin de gestion de la carte sd nous avons ranger les fichier txt dans stratégie
 
-    ihm.show(fichiers); // onglet avec les fichier de strategie affichier
-    ihm.ActionneurInit();
-    ThisThread::sleep_for(1ms);
-    led1 = 0;
-    led2 = 0;
-    led3 = 0;
+ihm.show(fichiers); // onglet avec les fichier de strategie affichier
+ihm.ActionneurInit();
+ThisThread::sleep_for(1ms);
+led1 = 0;
+led2 = 0;
+led3 = 0;
 
-    typedef enum
-    {
-        multi_init,
-        show_run_page,
-        test
-    } type_etat;
-    static type_etat etat;
+// Démarrage du Ticker pour mise à jour CarteSd2 toutes les 2 secondes
+carteSd2UpdateTicker.attach(callback(updateCarteSd2), 2s);
+
+// Mise à jour initiale immédiate de l'état de la carte SD
+int flag = threadSD.status();
+if (flag & ThreadSD::FLAG_READY)
+{
+    ihm.updateCarteSd2Status(true, countStrategyFiles());
+}
+else
+{
+    ihm.updateCarteSd2Status(false, 0);
+}
+
+typedef enum
+{
+    multi_init,
+    show_run_page,
+    test
+} type_etat;
+static type_etat etat;
     etat = multi_init;
 
     while (1)
     {
+        // Mise à jour périodique de l'onglet CarteSd2
+        if (flagUpdateCarteSd2)
+        {
+            flagUpdateCarteSd2 = false;
+            int flag = threadSD.status();
+            if (flag & ThreadSD::FLAG_READY)
+            {
+                // Carte SD détectée et prête
+                ihm.updateCarteSd2Status(true, countStrategyFiles());
+            }
+            else if (flag & ThreadSD::FLAG_NO_CARD)
+            {
+                // Carte SD non détectée
+                ihm.updateCarteSd2Status(false, 0);
+            }
+        }
 
         switch (etat)
         {
@@ -601,4 +634,16 @@ void forceFinMatch()
 int tempsRestant()
 {
     return std::chrono::duration_cast<std::chrono::seconds>(timerMatch.remaining_time()).count();
+}
+
+// Fonction appelée toutes les 2 secondes par le Ticker
+void updateCarteSd2()
+{
+    flagUpdateCarteSd2 = true;
+}
+
+// Fonction helper pour compter les fichiers de stratégie
+int countStrategyFiles()
+{
+    return fichiers.size();
 }
