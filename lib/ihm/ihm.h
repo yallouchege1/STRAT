@@ -54,8 +54,8 @@ protected:
         IHM_FLAG_RECALAGE_HAUTMILIEU =      (1UL << 21),
         IHM_FLAG_ACTIONNEUR_ASSERV_ON =     (1UL << 22),
         IHM_FLAG_ACTIONNEUR_ASSERV_OFF =    (1UL << 23),
-        IHM_FLAG__autre= (1UL << 30 )  , 
-       
+        IHM_FLAG__autre= (1UL << 30 )  ,
+
     } IhmFlag;
     EventFlags flags;
     ThreadLvgl *m_threadLvgl;
@@ -96,11 +96,15 @@ protected:
     lv_obj_t * lacher ;
     lv_obj_t * autre ;
 
-    // Onglet "CarteSd2"
-    lv_obj_t *tabCarteSd2;
-    lv_obj_t *spinnerCarteSd2;
-    lv_obj_t *labelCarteSd2Status;
-    lv_obj_t *labelCarteSd2FileCount;
+    // Test Ventouses - Navigation 3 niveaux
+    lv_obj_t *btnTestVentouses;          // Bouton principal dans ActionneurInit
+    lv_obj_t *ventousesContainer;        // Container pour les menus de navigation
+
+    // Onglet "CarteSD"
+    lv_obj_t *tabCarteSD;
+    lv_obj_t *spinnerCarteSD;
+    lv_obj_t *labelCarteSDStatus;
+    lv_obj_t *labelCarteSDFileCount;
 
     int volume;
     int mp3;
@@ -112,14 +116,18 @@ protected:
     lv_obj_t *msgBoxJack;
     // Message Box générique
     lv_obj_t *msgBox;
-    lv_obj_t *msgBoxChoixNIV ; 
+    lv_obj_t *msgBoxChoixNIV ;
 
-    void carteSd2Init(lv_obj_t *parent);
+    void carteSDInit(lv_obj_t *parent);
     static void eventHandler(lv_event_t *e);
     bool getFlag(IhmFlag f, bool clearIfSet = true);
     
 
 public:
+    // Variables publiques pour le système de test ventouses (accessibles par callbacks)
+    int ventousesCote;                   // 0=gauche, 1=droite, 2=les_deux
+    int ventousesNumero;                 // 1/2/3/4
+    int ventousesAction;                 // 0=attraper, 1=lacher, 2=les_deux
 
     Ihm(ThreadLvgl *t);
     void show(const vector<string> fichiers);
@@ -193,8 +201,15 @@ bool autretest(bool clearIfSet = true) { return getFlag(IHM_FLAG__autre, clearIf
     void msgBoxmatchshow (const string &strategie) ;
     void msgBoxmatchshowclose ()  ;
 
-    // CarteSd2 methods
-    void updateCarteSd2Status(bool detected, int fileCount);
+    // Test Ventouses - Méthodes de navigation
+    void showVentousesNiveau1();         // Affiche: Gauche/Droite/Les deux
+    void showVentousesNiveau2(int cote); // Affiche: Ventouse 1/2/3/4/Annuler
+    void showVentousesNiveau3(int cote, int numero); // Affiche: Attraper/Lâcher/Les deux/Annuler
+    void executeVentouse(int cote, int numero, int action); // Fonction finale d'exécution
+    void closeVentousesMenu();           // Ferme le menu et retourne à ActionneurInit
+
+    // CarteSD methods
+    void updateCarteSDStatus(bool detected, int fileCount);
 
 
 };

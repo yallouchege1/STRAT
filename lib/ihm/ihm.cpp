@@ -19,14 +19,14 @@ Ihm::Ihm(ThreadLvgl *t) {
     lv_label_set_text(label, "CRAC2026");
     lv_obj_align(label, LV_ALIGN_TOP_LEFT, 337, 0);
 
-    // Ajout de l'onglet CarteSd2
-    tabCarteSd2 = lv_tabview_add_tab(tabView, "CarteSd2");
-    carteSd2Init(tabCarteSd2);
+    // Ajout de l'onglet CarteSD
+    tabCarteSD = lv_tabview_add_tab(tabView, "CarteSD");
+    carteSDInit(tabCarteSD);
 
     t->unlock();
 }
 
-void Ihm::carteSd2Init(lv_obj_t *parent) {
+void Ihm::carteSDInit(lv_obj_t *parent) {
     // Titre
     lv_obj_t *titre = lv_label_create(parent);
     lv_label_set_text(titre, LV_SYMBOL_SD_CARD " Détection Carte SD");
@@ -34,33 +34,33 @@ void Ihm::carteSd2Init(lv_obj_t *parent) {
     lv_obj_align(titre, LV_ALIGN_TOP_MID, 0, 20);
 
     // Spinner (indicateur de chargement animé)
-    spinnerCarteSd2 = lv_spinner_create(parent, 1000, 60);
-    lv_obj_set_size(spinnerCarteSd2, 120, 120);
-    lv_obj_align(spinnerCarteSd2, LV_ALIGN_CENTER, 0, -20);
+    spinnerCarteSD = lv_spinner_create(parent, 1000, 60);
+    lv_obj_set_size(spinnerCarteSD, 120, 120);
+    lv_obj_align(spinnerCarteSD, LV_ALIGN_CENTER, 0, -20);
 
     // Label de statut principal
-    labelCarteSd2Status = lv_label_create(parent);
-    lv_label_set_text(labelCarteSd2Status, LV_SYMBOL_REFRESH " En attente de la carte SD...");
-    lv_obj_set_style_text_font(labelCarteSd2Status, FONT_NORMAL, 0);
-    lv_obj_align(labelCarteSd2Status, LV_ALIGN_CENTER, 0, 80);
+    labelCarteSDStatus = lv_label_create(parent);
+    lv_label_set_text(labelCarteSDStatus, LV_SYMBOL_REFRESH " En attente de la carte SD...");
+    lv_obj_set_style_text_font(labelCarteSDStatus, FONT_NORMAL, 0);
+    lv_obj_align(labelCarteSDStatus, LV_ALIGN_CENTER, 0, 80);
 
     // Label pour le nombre de fichiers
-    labelCarteSd2FileCount = lv_label_create(parent);
-    lv_label_set_text(labelCarteSd2FileCount, "");
-    lv_obj_set_style_text_font(labelCarteSd2FileCount, FONT_NORMAL, 0);
-    lv_obj_align(labelCarteSd2FileCount, LV_ALIGN_CENTER, 0, 130);
+    labelCarteSDFileCount = lv_label_create(parent);
+    lv_label_set_text(labelCarteSDFileCount, "");
+    lv_obj_set_style_text_font(labelCarteSDFileCount, FONT_NORMAL, 0);
+    lv_obj_align(labelCarteSDFileCount, LV_ALIGN_CENTER, 0, 130);
 }
 
-void Ihm::updateCarteSd2Status(bool detected, int fileCount) {
+void Ihm::updateCarteSDStatus(bool detected, int fileCount) {
     m_threadLvgl->lock();
 
     if (detected) {
         // Masquer le spinner quand la carte SD est détectée
-        lv_obj_add_flag(spinnerCarteSd2, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_add_flag(spinnerCarteSD, LV_OBJ_FLAG_HIDDEN);
 
         // Mettre à jour le message de statut
-        lv_label_set_text(labelCarteSd2Status, LV_SYMBOL_OK " Carte SD détectée");
-        lv_obj_set_style_text_color(labelCarteSd2Status, lv_palette_main(LV_PALETTE_GREEN), 0);
+        lv_label_set_text(labelCarteSDStatus, LV_SYMBOL_OK " Carte SD détectée");
+        lv_obj_set_style_text_color(labelCarteSDStatus, lv_palette_main(LV_PALETTE_GREEN), 0);
 
         // Afficher le nombre de fichiers
         char buf[100];
@@ -68,18 +68,18 @@ void Ihm::updateCarteSd2Status(bool detected, int fileCount) {
                 fileCount,
                 (fileCount > 1) ? "s" : "",
                 (fileCount > 1) ? "s" : "");
-        lv_label_set_text(labelCarteSd2FileCount, buf);
-        lv_obj_set_style_text_color(labelCarteSd2FileCount, lv_palette_main(LV_PALETTE_BLUE), 0);
+        lv_label_set_text(labelCarteSDFileCount, buf);
+        lv_obj_set_style_text_color(labelCarteSDFileCount, lv_palette_main(LV_PALETTE_BLUE), 0);
     } else {
         // Afficher le spinner quand la carte SD n'est pas détectée
-        lv_obj_clear_flag(spinnerCarteSd2, LV_OBJ_FLAG_HIDDEN);
+        lv_obj_clear_flag(spinnerCarteSD, LV_OBJ_FLAG_HIDDEN);
 
         // Mettre à jour le message de statut
-        lv_label_set_text(labelCarteSd2Status, LV_SYMBOL_WARNING " Carte SD non détectée - En attente...");
-        lv_obj_set_style_text_color(labelCarteSd2Status, lv_palette_main(LV_PALETTE_ORANGE), 0);
+        lv_label_set_text(labelCarteSDStatus, LV_SYMBOL_WARNING " Carte SD non détectée - En attente...");
+        lv_obj_set_style_text_color(labelCarteSDStatus, lv_palette_main(LV_PALETTE_ORANGE), 0);
 
         // Effacer le compteur de fichiers
-        lv_label_set_text(labelCarteSd2FileCount, "");
+        lv_label_set_text(labelCarteSDFileCount, "");
     }
 
     m_threadLvgl->unlock();
@@ -223,7 +223,14 @@ void Ihm::ActionneurInit() {
     lv_label_set_text(titreActionneur, LV_SYMBOL_EDIT " Test/preglage");  // LV_SYMBOL_ENVELOPE LV_SYMBOL_DRIVE LV_SYMBOL_EDIT
     lv_obj_set_grid_cell(titreActionneur, LV_GRID_ALIGN_STRETCH, 0, 1,
                          LV_GRID_ALIGN_STRETCH, 0, 1);
-// ---------------------------------------------------------
+
+    /* ========================================
+     * ANCIENS BOUTONS - RÉFÉRENCE
+     * Ne pas supprimer, garder comme template
+     * ======================================== */
+
+    /* ---------------------------------------------------------
+    // Bouton "Pos Init"
     Pos_init = lv_btn_create(container);
     lv_obj_t *label = lv_label_create( Pos_init);
     lv_label_set_text(label, "Pos Init ");
@@ -234,39 +241,41 @@ void Ihm::ActionneurInit() {
     lv_obj_set_grid_cell( Pos_init, LV_GRID_ALIGN_STRETCH, 0, 1,
                          LV_GRID_ALIGN_STRETCH, 1, 1);
     lv_obj_add_event_cb( Pos_init, Ihm::eventHandler, LV_EVENT_CLICKED, this);
+    */ // ------------------------------------------------------------
 
-// ------------------------------------------------------------
+    /* ------------------------------------------------------------
+    // Bouton "Test Ventouse"
+    // Création d'un bouton
+    testventouse = lv_btn_create(container);
 
-// Création d'un bouton
-testventouse = lv_btn_create(container);
+    // Création d'un label (texte) pour le bouton
+    label = lv_label_create(testventouse );
 
-// Création d'un label (texte) pour le bouton 
-label = lv_label_create(testventouse );
+    // Définit le texte
+    lv_label_set_text(label, "Test Ventouse  ");
 
-// Définit le texte 
-lv_label_set_text(label, "Test Ventouse  ");
+    // Rend le bouton "checkable"  basculer  (coché/décoché)
+    lv_obj_add_flag(testventouse, LV_OBJ_FLAG_CHECKABLE);
 
-// Rend le bouton "checkable"  basculer  (coché/décoché)
-lv_obj_add_flag(testventouse, LV_OBJ_FLAG_CHECKABLE);
+    // Définit la couleur de fond
+    lv_obj_set_style_bg_color(testventouse, lv_palette_main(LV_PALETTE_LIGHT_BLUE), LV_STATE_DEFAULT);
 
-// Définit la couleur de fond 
-lv_obj_set_style_bg_color(testventouse, lv_palette_main(LV_PALETTE_LIGHT_BLUE), LV_STATE_DEFAULT);
+    // Définit la couleur de fond est "coché" en violet foncé
+    lv_obj_set_style_bg_color(testventouse ,  lv_palette_main(LV_PALETTE_DEEP_PURPLE), LV_STATE_CHECKED);
 
-// Définit la couleur de fond est "coché" en violet foncé
-lv_obj_set_style_bg_color(testventouse ,  lv_palette_main(LV_PALETTE_DEEP_PURPLE), LV_STATE_CHECKED);
+    // Centre le texte au centre
+    lv_obj_center(label);
 
-// Centre le texte au centre 
-lv_obj_center(label);
+    // Positionne le bouton dans une grille :
+    lv_obj_set_grid_cell(testventouse, LV_GRID_ALIGN_STRETCH, 0, 1,
+                         LV_GRID_ALIGN_STRETCH, 2, 1);
 
-// Positionne le bouton dans une grille :
-lv_obj_set_grid_cell(testventouse, LV_GRID_ALIGN_STRETCH, 0, 1,
-                     LV_GRID_ALIGN_STRETCH, 2, 1);
+    // Activer un événements au bouton 'Gradiniveaux1' :
+    lv_obj_add_event_cb(testventouse, Ihm::eventHandler, LV_EVENT_CLICKED, this);
+    */ // --------------------------------------------------------------------------
 
-// Activer un événements au bouton 'Gradiniveaux1' :
-lv_obj_add_event_cb(testventouse, Ihm::eventHandler, LV_EVENT_CLICKED, this);
-
-// --------------------------------------------------------------------------
-
+    /* ----------------------------------------------------------------------
+    // Bouton "Test Construction"
     Gradinniveaux2 = lv_btn_create(container);
     label = lv_label_create(Gradinniveaux2);
     lv_label_set_text(label, "Test Construction");
@@ -277,10 +286,11 @@ lv_obj_add_event_cb(testventouse, Ihm::eventHandler, LV_EVENT_CLICKED, this);
     lv_obj_set_grid_cell(Gradinniveaux2, LV_GRID_ALIGN_STRETCH, 1, 1,
                          LV_GRID_ALIGN_STRETCH, 1, 1);
     lv_obj_add_event_cb(Gradinniveaux2, Ihm::eventHandler, LV_EVENT_CLICKED, this);
+    */ // ----------------------------------------------------------------------
 
- // ----------------------------------------------------------------------
- 
-      niveaux_base= lv_btn_create(container);
+    /* ----------------------------------------------------------------------
+    // Bouton "Test Niveaux B"
+    niveaux_base= lv_btn_create(container);
     label = lv_label_create(niveaux_base);
     lv_label_set_text(label, "Test Niveaux B");
     lv_obj_add_flag(niveaux_base, LV_OBJ_FLAG_CHECKABLE);
@@ -290,30 +300,50 @@ lv_obj_add_event_cb(testventouse, Ihm::eventHandler, LV_EVENT_CLICKED, this);
     lv_obj_set_grid_cell(niveaux_base, LV_GRID_ALIGN_STRETCH, 1, 1,
                          LV_GRID_ALIGN_STRETCH, 2, 1);
     lv_obj_add_event_cb(niveaux_base, Ihm::eventHandler, LV_EVENT_CLICKED, this);
+    */ // ----------------------------------------------------------------------------
 
- // ----------------------------------------------------------------------------
+    /* ----------------------------------------------------------------------------
+    // Bouton "Lâcher"
+    lacher = lv_btn_create(container);
+    label = lv_label_create(lacher);
+    lv_label_set_text(label, " Test Lâcher");
+    lv_obj_add_flag(lacher, LV_OBJ_FLAG_CHECKABLE);
+    lv_obj_set_style_bg_color(lacher, lv_palette_main(LV_PALETTE_LIGHT_BLUE), LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(lacher, lv_palette_main(LV_PALETTE_DEEP_PURPLE), LV_STATE_CHECKED);
+    lv_obj_center(label);
+    lv_obj_set_grid_cell(lacher, LV_GRID_ALIGN_STRETCH, 2, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+    lv_obj_add_event_cb(lacher, Ihm::eventHandler, LV_EVENT_CLICKED, this);
+    */ // ----------------------------------------------------------------------------
 
-// Création du bouton "Lâcher"
-lacher = lv_btn_create(container);
-label = lv_label_create(lacher);
-lv_label_set_text(label, " Test Lâcher");
-lv_obj_add_flag(lacher, LV_OBJ_FLAG_CHECKABLE);
-lv_obj_set_style_bg_color(lacher, lv_palette_main(LV_PALETTE_LIGHT_BLUE), LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(lacher, lv_palette_main(LV_PALETTE_DEEP_PURPLE), LV_STATE_CHECKED);
-lv_obj_center(label);
-lv_obj_set_grid_cell(lacher, LV_GRID_ALIGN_STRETCH, 2, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
-lv_obj_add_event_cb(lacher, Ihm::eventHandler, LV_EVENT_CLICKED, this);
+    /* ----------------------------------------------------------------------------
+    // Bouton "Autre"
+    autre = lv_btn_create(container);
+    label = lv_label_create(autre);
+    lv_label_set_text(label, "Test jpo");
+    lv_obj_add_flag(autre, LV_OBJ_FLAG_CHECKABLE);
+    lv_obj_set_style_bg_color(autre, lv_palette_main(LV_PALETTE_LIGHT_BLUE), LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(autre, lv_palette_main(LV_PALETTE_DEEP_PURPLE), LV_STATE_CHECKED);
+    lv_obj_center(label);
+    lv_obj_set_grid_cell(autre, LV_GRID_ALIGN_STRETCH, 2, 1, LV_GRID_ALIGN_STRETCH, 2, 1);
+    lv_obj_add_event_cb(autre, Ihm::eventHandler, LV_EVENT_CLICKED, this);
+    */ // ----------------------------------------------------------------------------
 
-// Création du bouton "Autre"
-autre = lv_btn_create(container);
-label = lv_label_create(autre);
-lv_label_set_text(label, "Test jpo");
-lv_obj_add_flag(autre, LV_OBJ_FLAG_CHECKABLE);
-lv_obj_set_style_bg_color(autre, lv_palette_main(LV_PALETTE_LIGHT_BLUE), LV_STATE_DEFAULT);
-lv_obj_set_style_bg_color(autre, lv_palette_main(LV_PALETTE_DEEP_PURPLE), LV_STATE_CHECKED);
-lv_obj_center(label);
-lv_obj_set_grid_cell(autre, LV_GRID_ALIGN_STRETCH, 2, 1, LV_GRID_ALIGN_STRETCH, 2, 1);
-lv_obj_add_event_cb(autre, Ihm::eventHandler, LV_EVENT_CLICKED, this);
+    /* ========================================
+     * NOUVEAUX BOUTONS
+     * ======================================== */
+
+    // Bouton "Test Ventouses" - Ouvre le menu de navigation 3 niveaux
+    btnTestVentouses = lv_btn_create(container);
+    lv_obj_t *label = lv_label_create(btnTestVentouses);
+    lv_label_set_text(label, "Test Ventouses");
+    lv_obj_add_flag(btnTestVentouses, LV_OBJ_FLAG_CHECKABLE);
+    lv_obj_set_style_bg_color(btnTestVentouses, lv_palette_main(LV_PALETTE_LIGHT_BLUE), LV_STATE_DEFAULT);
+    lv_obj_set_style_bg_color(btnTestVentouses, lv_palette_main(LV_PALETTE_DEEP_PURPLE), LV_STATE_CHECKED);
+    lv_obj_center(label);
+    lv_obj_set_grid_cell(btnTestVentouses, LV_GRID_ALIGN_STRETCH, 0, 1,
+                         LV_GRID_ALIGN_STRETCH, 1, 1);
+    lv_obj_add_event_cb(btnTestVentouses, Ihm::eventHandler, LV_EVENT_CLICKED, this);
+
     m_threadLvgl->unlock();
 }
 void Ihm::configRollerSetOptions(const vector<string> fichiers, bool lock) {
@@ -372,16 +402,21 @@ void Ihm::eventHandler(lv_event_t *e) {
 
     else if ( emetteur == ihm-> lacher)
     {
-        ihm -> flags.set( IHM_FLAG_Lacher) ; 
+        ihm -> flags.set( IHM_FLAG_Lacher) ;
     }
-   
 
-    else if (emetteur == ihm->msgBoxRecalage & lv_msgbox_get_active_btn_text(emetteur)!= nullptr && strcmp(lv_msgbox_get_active_btn_text(emetteur), "Ok") == 0) 
+    // Gestion du bouton Test Ventouses - Ouvre le niveau 1
+    else if (emetteur == ihm->btnTestVentouses && lv_obj_has_state(emetteur, LV_STATE_CHECKED))
     {
-       
+        ihm->showVentousesNiveau1();
+    }
+
+    else if (emetteur == ihm->msgBoxRecalage & lv_msgbox_get_active_btn_text(emetteur)!= nullptr && strcmp(lv_msgbox_get_active_btn_text(emetteur), "Ok") == 0)
+    {
+
             ihm->flags.set(IHM_FLAG__autre);
-            lv_msgbox_close(emetteur);  
-        
+            lv_msgbox_close(emetteur);
+
     }
    
  
@@ -625,7 +660,7 @@ void Ihm::showButtonascenceurBox(){
     msgBoxSelectionascenceur  = lv_msgbox_create(lv_scr_act(), "Sélectionner une partie du robot", "Une fois selectionnée attendre un delai de 5s :", btns, true);
     lv_obj_set_size(msgBoxSelectionascenceur, 740, 420);
     lv_obj_add_event_cb(msgBoxSelectionascenceur, selection_ascenseur_event_handler, LV_EVENT_VALUE_CHANGED, NULL);
-    
+
     lv_obj_center(msgBoxSelectionascenceur);
     // Récupération du conteneur des boutons
     lv_obj_t *btnmatrix = lv_msgbox_get_btns(msgBoxSelectionascenceur);
@@ -636,6 +671,282 @@ void Ihm::showButtonascenceurBox(){
         lv_obj_set_style_pad_column(btnmatrix, 10, 0); // Espacement horizontal
     }
 
+}
+
+/* ============================================================================
+ * SYSTÈME DE TEST VENTOUSES - NAVIGATION 3 NIVEAUX
+ * ============================================================================ */
+
+// Variables statiques pour stocker le contexte de navigation
+static Ihm *ventousesIhmContext = nullptr;
+
+// Callback pour les boutons du NIVEAU 1 (Gauche/Droite/Les deux)
+static void ventousesNiveau1EventHandler(lv_event_t *e) {
+    if (ventousesIhmContext == nullptr) return;
+
+    lv_obj_t *btn = lv_event_get_target(e);
+    int cote = (int)(intptr_t)lv_event_get_user_data(e);
+
+    ventousesIhmContext->ventousesCote = cote;
+    ventousesIhmContext->showVentousesNiveau2(cote);
+}
+
+// Callback pour les boutons du NIVEAU 2 (Ventouse 1/2/3/4/Annuler)
+static void ventousesNiveau2EventHandler(lv_event_t *e) {
+    if (ventousesIhmContext == nullptr) return;
+
+    lv_obj_t *btn = lv_event_get_target(e);
+    int action = (int)(intptr_t)lv_event_get_user_data(e);
+
+    if (action == -1) {
+        // Annuler - Retour à l'onglet Test Actionneur
+        ventousesIhmContext->closeVentousesMenu();
+    } else {
+        // Sélection d'une ventouse (1, 2, 3, ou 4)
+        ventousesIhmContext->ventousesNumero = action;
+        ventousesIhmContext->showVentousesNiveau3(ventousesIhmContext->ventousesCote, action);
+    }
+}
+
+// Callback pour les boutons du NIVEAU 3 (Attraper/Lâcher/Les deux/Annuler)
+static void ventousesNiveau3EventHandler(lv_event_t *e) {
+    if (ventousesIhmContext == nullptr) return;
+
+    lv_obj_t *btn = lv_event_get_target(e);
+    int action = (int)(intptr_t)lv_event_get_user_data(e);
+
+    if (action == -1) {
+        // Annuler - Retour au niveau 2
+        ventousesIhmContext->showVentousesNiveau2(ventousesIhmContext->ventousesCote);
+    } else {
+        // Action finale (Attraper=0, Lâcher=1, Les deux=2)
+        ventousesIhmContext->ventousesAction = action;
+        ventousesIhmContext->executeVentouse(
+            ventousesIhmContext->ventousesCote,
+            ventousesIhmContext->ventousesNumero,
+            action
+        );
+    }
+}
+
+// NIVEAU 1: Sélection du côté (Gauche/Droite/Les deux)
+void Ihm::showVentousesNiveau1() {
+    m_threadLvgl->lock();
+
+    ventousesIhmContext = this;
+
+    // Créer le container pour le menu
+    if (ventousesContainer != nullptr) {
+        lv_obj_del(ventousesContainer);
+    }
+
+    ventousesContainer = lv_obj_create(tabActionneur);
+    lv_obj_set_size(ventousesContainer, lv_obj_get_content_width(tabActionneur),
+                    lv_obj_get_content_height(tabActionneur));
+    lv_obj_center(ventousesContainer);
+
+    // Configuration de la grille (2 colonnes)
+    static lv_coord_t col[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t row[] = {50, LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+    lv_obj_set_grid_dsc_array(ventousesContainer, col, row);
+
+    // Titre
+    lv_obj_t *titre = lv_label_create(ventousesContainer);
+    lv_obj_set_style_text_font(titre, FONT_LARGE, 0);
+    lv_label_set_text(titre, "Test Ventouses - Sélection côté");
+    lv_obj_set_grid_cell(titre, LV_GRID_ALIGN_CENTER, 0, 2, LV_GRID_ALIGN_CENTER, 0, 1);
+
+    // Bouton "Gauche"
+    lv_obj_t *btnGauche = lv_btn_create(ventousesContainer);
+    lv_obj_t *labelGauche = lv_label_create(btnGauche);
+    lv_label_set_text(labelGauche, "Gauche");
+    lv_obj_center(labelGauche);
+    lv_obj_set_style_bg_color(btnGauche, lv_palette_main(LV_PALETTE_LIGHT_BLUE), LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(btnGauche, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+    lv_obj_add_event_cb(btnGauche, ventousesNiveau1EventHandler, LV_EVENT_CLICKED, (void*)0);
+
+    // Bouton "Droite"
+    lv_obj_t *btnDroite = lv_btn_create(ventousesContainer);
+    lv_obj_t *labelDroite = lv_label_create(btnDroite);
+    lv_label_set_text(labelDroite, "Droite");
+    lv_obj_center(labelDroite);
+    lv_obj_set_style_bg_color(btnDroite, lv_palette_main(LV_PALETTE_LIGHT_BLUE), LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(btnDroite, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+    lv_obj_add_event_cb(btnDroite, ventousesNiveau1EventHandler, LV_EVENT_CLICKED, (void*)1);
+
+    // Bouton "Les deux"
+    lv_obj_t *btnLesDeux = lv_btn_create(ventousesContainer);
+    lv_obj_t *labelLesDeux = lv_label_create(btnLesDeux);
+    lv_label_set_text(labelLesDeux, "Les deux");
+    lv_obj_center(labelLesDeux);
+    lv_obj_set_style_bg_color(btnLesDeux, lv_palette_main(LV_PALETTE_GREEN), LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(btnLesDeux, LV_GRID_ALIGN_STRETCH, 0, 2, LV_GRID_ALIGN_STRETCH, 2, 1);
+    lv_obj_add_event_cb(btnLesDeux, ventousesNiveau1EventHandler, LV_EVENT_CLICKED, (void*)2);
+
+    m_threadLvgl->unlock();
+}
+
+// NIVEAU 2: Sélection de la ventouse (1/2/3/4/Annuler)
+void Ihm::showVentousesNiveau2(int cote) {
+    m_threadLvgl->lock();
+
+    // Supprimer l'ancien container
+    if (ventousesContainer != nullptr) {
+        lv_obj_del(ventousesContainer);
+    }
+
+    ventousesContainer = lv_obj_create(tabActionneur);
+    lv_obj_set_size(ventousesContainer, lv_obj_get_content_width(tabActionneur),
+                    lv_obj_get_content_height(tabActionneur));
+    lv_obj_center(ventousesContainer);
+
+    // Configuration de la grille (2 colonnes, 3 lignes)
+    static lv_coord_t col[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t row[] = {50, LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+    lv_obj_set_grid_dsc_array(ventousesContainer, col, row);
+
+    // Titre avec indication du côté sélectionné
+    lv_obj_t *titre = lv_label_create(ventousesContainer);
+    lv_obj_set_style_text_font(titre, FONT_LARGE, 0);
+    const char *coteStr = (cote == 0) ? "Gauche" : (cote == 1) ? "Droite" : "Les deux";
+    char titreTxt[100];
+    sprintf(titreTxt, "Ventouses %s - Numéro", coteStr);
+    lv_label_set_text(titre, titreTxt);
+    lv_obj_set_grid_cell(titre, LV_GRID_ALIGN_CENTER, 0, 2, LV_GRID_ALIGN_CENTER, 0, 1);
+
+    // Boutons Ventouse 1, 2, 3, 4
+    const char *labels[] = {"Ventouse 1", "Ventouse 2", "Ventouse 3", "Ventouse 4"};
+    for (int i = 0; i < 4; i++) {
+        lv_obj_t *btn = lv_btn_create(ventousesContainer);
+        lv_obj_t *label = lv_label_create(btn);
+        lv_label_set_text(label, labels[i]);
+        lv_obj_center(label);
+        lv_obj_set_style_bg_color(btn, lv_palette_main(LV_PALETTE_LIGHT_BLUE), LV_STATE_DEFAULT);
+
+        int col_pos = i % 2;
+        int row_pos = 1 + (i / 2);
+        lv_obj_set_grid_cell(btn, LV_GRID_ALIGN_STRETCH, col_pos, 1, LV_GRID_ALIGN_STRETCH, row_pos, 1);
+        lv_obj_add_event_cb(btn, ventousesNiveau2EventHandler, LV_EVENT_CLICKED, (void*)(intptr_t)(i + 1));
+    }
+
+    // Bouton "Annuler"
+    lv_obj_t *btnAnnuler = lv_btn_create(ventousesContainer);
+    lv_obj_t *labelAnnuler = lv_label_create(btnAnnuler);
+    lv_label_set_text(labelAnnuler, "Annuler");
+    lv_obj_center(labelAnnuler);
+    lv_obj_set_style_bg_color(btnAnnuler, lv_palette_main(LV_PALETTE_RED), LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(btnAnnuler, LV_GRID_ALIGN_STRETCH, 0, 2, LV_GRID_ALIGN_STRETCH, 3, 1);
+    lv_obj_add_event_cb(btnAnnuler, ventousesNiveau2EventHandler, LV_EVENT_CLICKED, (void*)-1);
+
+    m_threadLvgl->unlock();
+}
+
+// NIVEAU 3: Sélection de l'action (Attraper/Lâcher/Les deux/Annuler)
+void Ihm::showVentousesNiveau3(int cote, int numero) {
+    m_threadLvgl->lock();
+
+    // Supprimer l'ancien container
+    if (ventousesContainer != nullptr) {
+        lv_obj_del(ventousesContainer);
+    }
+
+    ventousesContainer = lv_obj_create(tabActionneur);
+    lv_obj_set_size(ventousesContainer, lv_obj_get_content_width(tabActionneur),
+                    lv_obj_get_content_height(tabActionneur));
+    lv_obj_center(ventousesContainer);
+
+    // Configuration de la grille (2 colonnes)
+    static lv_coord_t col[] = {LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+    static lv_coord_t row[] = {50, LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_FR(1), LV_GRID_TEMPLATE_LAST};
+    lv_obj_set_grid_dsc_array(ventousesContainer, col, row);
+
+    // Titre avec récapitulatif
+    lv_obj_t *titre = lv_label_create(ventousesContainer);
+    lv_obj_set_style_text_font(titre, FONT_LARGE, 0);
+    const char *coteStr = (cote == 0) ? "Gauche" : (cote == 1) ? "Droite" : "Les deux";
+    char titreTxt[100];
+    sprintf(titreTxt, "%s - V%d - Action", coteStr, numero);
+    lv_label_set_text(titre, titreTxt);
+    lv_obj_set_grid_cell(titre, LV_GRID_ALIGN_CENTER, 0, 2, LV_GRID_ALIGN_CENTER, 0, 1);
+
+    // Bouton "Attraper"
+    lv_obj_t *btnAttraper = lv_btn_create(ventousesContainer);
+    lv_obj_t *labelAttraper = lv_label_create(btnAttraper);
+    lv_label_set_text(labelAttraper, "Attraper");
+    lv_obj_center(labelAttraper);
+    lv_obj_set_style_bg_color(btnAttraper, lv_palette_main(LV_PALETTE_GREEN), LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(btnAttraper, LV_GRID_ALIGN_STRETCH, 0, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+    lv_obj_add_event_cb(btnAttraper, ventousesNiveau3EventHandler, LV_EVENT_CLICKED, (void*)0);
+
+    // Bouton "Lâcher"
+    lv_obj_t *btnLacher = lv_btn_create(ventousesContainer);
+    lv_obj_t *labelLacher = lv_label_create(btnLacher);
+    lv_label_set_text(labelLacher, "Lâcher");
+    lv_obj_center(labelLacher);
+    lv_obj_set_style_bg_color(btnLacher, lv_palette_main(LV_PALETTE_ORANGE), LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(btnLacher, LV_GRID_ALIGN_STRETCH, 1, 1, LV_GRID_ALIGN_STRETCH, 1, 1);
+    lv_obj_add_event_cb(btnLacher, ventousesNiveau3EventHandler, LV_EVENT_CLICKED, (void*)1);
+
+    // Bouton "Les deux"
+    lv_obj_t *btnLesDeux = lv_btn_create(ventousesContainer);
+    lv_obj_t *labelLesDeux = lv_label_create(btnLesDeux);
+    lv_label_set_text(labelLesDeux, "Les deux");
+    lv_obj_center(labelLesDeux);
+    lv_obj_set_style_bg_color(btnLesDeux, lv_palette_main(LV_PALETTE_BLUE), LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(btnLesDeux, LV_GRID_ALIGN_STRETCH, 0, 2, LV_GRID_ALIGN_STRETCH, 2, 1);
+    lv_obj_add_event_cb(btnLesDeux, ventousesNiveau3EventHandler, LV_EVENT_CLICKED, (void*)2);
+
+    // Bouton "Annuler"
+    lv_obj_t *btnAnnuler = lv_btn_create(ventousesContainer);
+    lv_obj_t *labelAnnuler = lv_label_create(btnAnnuler);
+    lv_label_set_text(labelAnnuler, "Annuler");
+    lv_obj_center(labelAnnuler);
+    lv_obj_set_style_bg_color(btnAnnuler, lv_palette_main(LV_PALETTE_RED), LV_STATE_DEFAULT);
+    lv_obj_set_grid_cell(btnAnnuler, LV_GRID_ALIGN_STRETCH, 0, 2, LV_GRID_ALIGN_STRETCH, 3, 1);
+    lv_obj_add_event_cb(btnAnnuler, ventousesNiveau3EventHandler, LV_EVENT_CLICKED, (void*)-1);
+
+    m_threadLvgl->unlock();
+}
+
+// Fonction d'exécution finale - Appelée quand l'utilisateur valide une action
+void Ihm::executeVentouse(int cote, int numero, int action) {
+    // Convertir les codes en chaînes pour le debug
+    const char *coteStr = (cote == 0) ? "gauche" : (cote == 1) ? "droite" : "les_deux";
+    const char *actionStr = (action == 0) ? "attraper" : (action == 1) ? "lacher" : "les_deux";
+
+    printf("[Test Ventouses] Exécution : Côté=%s, Numéro=%d, Action=%s\n",
+           coteStr, numero, actionStr);
+
+    // TODO: Ajouter ici l'envoi de commandes CAN ou autres actions matérielles
+    // Exemple:
+    // if (action == 0 || action == 2) { // Attraper ou Les deux
+    //     commandeVentouseAttraper(cote, numero);
+    // }
+    // if (action == 1 || action == 2) { // Lâcher ou Les deux
+    //     commandeVentouseLacher(cote, numero);
+    // }
+
+    // Retour à l'onglet Test Actionneur après l'exécution
+    closeVentousesMenu();
+}
+
+// Ferme le menu et retourne à l'onglet Test Actionneur
+void Ihm::closeVentousesMenu() {
+    m_threadLvgl->lock();
+
+    if (ventousesContainer != nullptr) {
+        lv_obj_del(ventousesContainer);
+        ventousesContainer = nullptr;
+    }
+
+    // Décocher le bouton Test Ventouses
+    if (btnTestVentouses != nullptr) {
+        lv_obj_clear_state(btnTestVentouses, LV_STATE_CHECKED);
+    }
+
+    ventousesIhmContext = nullptr;
+
+    m_threadLvgl->unlock();
 }
 
 

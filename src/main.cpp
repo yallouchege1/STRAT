@@ -47,11 +47,11 @@ void runMatch();
 int tempsRestant();
 void forceFinMatch();
 volatile bool flagForceFinMatch = false;
-// ------ Ticker pour mise à jour CarteSd2
-Ticker carteSd2UpdateTicker;
-void updateCarteSd2();
+// ------ Ticker pour mise à jour CarteSD
+Ticker carteSDUpdateTicker;
+void updateCarteSD();
 int countStrategyFiles();
-volatile bool flagUpdateCarteSd2 = false;
+volatile bool flagUpdateCarteSD = false;
 DigitalOut led1(PG_6);
 DigitalOut led2(PD_4);
 DigitalOut led3(PD_5);
@@ -133,18 +133,18 @@ led1 = 0;
 led2 = 0;
 led3 = 0;
 
-// Démarrage du Ticker pour mise à jour CarteSd2 toutes les 2 secondes
-carteSd2UpdateTicker.attach(callback(updateCarteSd2), 2s);
+// Démarrage du Ticker pour mise à jour CarteSD toutes les 2 secondes
+carteSDUpdateTicker.attach(callback(updateCarteSD), 2s);
 
 // Mise à jour initiale immédiate de l'état de la carte SD
 int flag = threadSD.status();
 if (flag & ThreadSD::FLAG_READY)
 {
-    ihm.updateCarteSd2Status(true, countStrategyFiles());
+    ihm.updateCarteSDStatus(true, countStrategyFiles());
 }
 else
 {
-    ihm.updateCarteSd2Status(false, 0);
+    ihm.updateCarteSDStatus(false, 0);
 }
 
 typedef enum
@@ -158,20 +158,20 @@ static type_etat etat;
 
     while (1)
     {
-        // Mise à jour périodique de l'onglet CarteSd2
-        if (flagUpdateCarteSd2)
+        // Mise à jour périodique de l'onglet CarteSD
+        if (flagUpdateCarteSD)
         {
-            flagUpdateCarteSd2 = false;
+            flagUpdateCarteSD = false;
             int flag = threadSD.status();
             if (flag & ThreadSD::FLAG_READY)
             {
                 // Carte SD détectée et prête
-                ihm.updateCarteSd2Status(true, countStrategyFiles());
+                ihm.updateCarteSDStatus(true, countStrategyFiles());
             }
             else if (flag & ThreadSD::FLAG_NO_CARD)
             {
                 // Carte SD non détectée
-                ihm.updateCarteSd2Status(false, 0);
+                ihm.updateCarteSDStatus(false, 0);
             }
         }
 
@@ -637,9 +637,9 @@ int tempsRestant()
 }
 
 // Fonction appelée toutes les 2 secondes par le Ticker
-void updateCarteSd2()
+void updateCarteSD()
 {
-    flagUpdateCarteSd2 = true;
+    flagUpdateCarteSD = true;
 }
 
 // Fonction helper pour compter les fichiers de stratégie
