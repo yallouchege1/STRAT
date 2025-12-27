@@ -11,6 +11,12 @@
 #define FONT_NORMAL &liberation_24
 #define FONT_LARGE &liberation_40
 
+// Variables globales pour test ventouses
+extern int selected_ventouse_position;
+extern int selected_ventouse_numero;
+extern int selected_ventouse_action;
+extern bool flag_test_ventouses_clicked;
+
 class Ihm
 {
 protected:
@@ -80,6 +86,10 @@ protected:
     //Onglet "test actionneur"
     lv_obj_t *tabActionneur;
     lv_obj_t *Pos_init;
+
+    //Onglet "Test"
+    lv_obj_t *tabTest;
+    lv_obj_t *btnTestVentouses;
 
     lv_obj_t *testventouse;
     lv_obj_t *testventouse_avant ;
@@ -155,6 +165,7 @@ public:
    bool Position_init(bool clearIfSet = true) { return getFlag(IHM_FLAG__Position_init , clearIfSet);}
  bool departClicked(bool clearIfSet = true) { return getFlag(IHM_FLAG_DEPART, clearIfSet); }
 bool autretest(bool clearIfSet = true) { return getFlag(IHM_FLAG__autre, clearIfSet); }
+    bool testVentousesClicked(bool clearIfSet = true) { return getFlag(IHM_FLAG__autre, clearIfSet); }
 
 
     bool refreshSDClicked(bool clearIfSet = true) { return getFlag(IHM_FLAG_REFRESH_SD, clearIfSet); }
@@ -200,6 +211,13 @@ bool autretest(bool clearIfSet = true) { return getFlag(IHM_FLAG__autre, clearIf
     void showButtonascenceurBoxClose() ;
     void msgBoxmatchshow (const string &strategie) ;
     void msgBoxmatchshowclose ()  ;
+    void testTabInit();
+    void showVentousePositionBox();
+    void showVentousePositionBoxClose();
+    void showVentouseNumeroBox();
+    void showVentouseNumeroBoxClose();
+    void showVentouseActionBox();
+    void showVentouseActionBoxClose();
 
     // Test Ventouses - Méthodes de navigation
     void showVentousesNiveau1();         // Affiche: Gauche/Droite/Les deux

@@ -65,6 +65,9 @@ void run_show(void);
 
 int main()
 
+
+
+
 {
 
     printf("\n Show debut de l'écran de stratégie ->  \n");
@@ -128,6 +131,7 @@ int main()
 
 ihm.show(fichiers); // onglet avec les fichier de strategie affichier
 ihm.ActionneurInit();
+ihm.testTabInit();
 ThisThread::sleep_for(1ms);
 led1 = 0;
 led2 = 0;
@@ -151,7 +155,10 @@ typedef enum
 {
     multi_init,
     show_run_page,
-    test
+    test,
+    test_ventouse_position,
+    test_ventouse_numero,
+    test_ventouse_action
 } type_etat;
 static type_etat etat;
     etat = multi_init;
@@ -435,7 +442,76 @@ static type_etat etat;
             }
             else if (ihm.autretest())
             {
-                threadCAN.sendAck(TEST_BRAS_1, 8);
+                // Test si c'est le bouton Test Ventouses
+                if (flag_test_ventouses_clicked)
+                {
+                    flag_test_ventouses_clicked = false;
+                    selected_ventouse_position = 0;
+                    selected_ventouse_numero = 0;
+                    selected_ventouse_action = 0;
+                    etat = test_ventouse_position;
+                }
+                else
+                {
+                    threadCAN.sendAck(TEST_BRAS_1, 8);
+                }
+            }
+            break;
+
+        case test_ventouse_position:
+            ihm.showVentousePositionBox();
+            ThisThread::sleep_for(5s);
+            ihm.showVentousePositionBoxClose();
+
+            if (selected_ventouse_position == 4 || selected_ventouse_position == 0)
+            {
+                // Annuler ou timeout
+                etat = multi_init;
+            }
+            else if (selected_ventouse_position >= 1 && selected_ventouse_position <= 3)
+            {
+                etat = test_ventouse_numero;
+            }
+            break;
+
+        case test_ventouse_numero:
+            ihm.showVentouseNumeroBox();
+            ThisThread::sleep_for(5s);
+            ihm.showVentouseNumeroBoxClose();
+
+            if (selected_ventouse_numero == 6 || selected_ventouse_numero == 0)
+            {
+                // Annuler ou timeout
+                etat = multi_init;
+            }
+            else if (selected_ventouse_numero >= 1 && selected_ventouse_numero <= 5)
+            {
+                etat = test_ventouse_action;
+            }
+            break;
+
+        case test_ventouse_action:
+            ihm.showVentouseActionBox();
+            ThisThread::sleep_for(5s);
+            ihm.showVentouseActionBoxClose();
+
+            if (selected_ventouse_action == 3 || selected_ventouse_action == 0)
+            {
+                // Annuler ou timeout
+                etat = multi_init;
+            }
+            else if (selected_ventouse_action >= 1 && selected_ventouse_action <= 2)
+            {
+                // Executer l'action
+                printf("\n Test Ventouse effectue : \n");
+                printf("   Position: %d (1=Gauche, 2=Droite, 3=Les deux)\n", selected_ventouse_position);
+                printf("   Numero: %d (1-4=Ventouse, 5=Les 4)\n", selected_ventouse_numero);
+                printf("   Action: %d (1=Attraper, 2=Lacher)\n", selected_ventouse_action);
+
+                // TODO: Envoyer la commande CAN correspondante
+                // threadCAN.sendAck(ID_VENTOUSE_XX, valeur);
+
+                etat = multi_init;
             }
             break;
 
